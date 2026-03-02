@@ -56,7 +56,13 @@ def run_batch(wallets_batch, proxy):
 def main():
     while True:
         for proxy in proxies:
-            print(f"\n🌐 Đang dùng proxy: {proxy}")
+            # Mask proxy credentials in logs
+            parts = proxy.split(":")
+            if len(parts) >= 4:
+                masked_proxy = f"{parts[0]}:{parts[1]}:***:***"
+            else:
+                masked_proxy = "***"
+            print(f"\n🌐 Đang dùng proxy: {masked_proxy}")
             wallet_index = 0
             while wallet_index < len(wallets):
                 num_threads = random.randint(MIN_THREADS, MAX_THREADS)
