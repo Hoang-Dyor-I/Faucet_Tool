@@ -1,0 +1,4 @@
+## 2024-05-24 - [CRITICAL] Fix proxy credential leakage in logs
+**Vulnerability:** Proxy credentials (user/password) were being leaked in the standard output via printing raw proxy configuration strings and unhandled `requests` library exceptions.
+**Learning:** In applications utilizing proxy authentication, `requests` exceptions often include the full proxy URL in the error message, potentially exposing secrets if the exception string is logged or printed directly. Furthermore, printing raw configuration strings directly from files like `proxies.txt` is unsafe if they contain secrets.
+**Prevention:** Always mask or redact sensitive parts of URLs or configuration strings before logging or printing them. Catch exceptions and log their type or a generic error message instead of the full exception string if the context might contain sensitive data like proxy configurations. Avoid printing full response text on failures.
