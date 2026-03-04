@@ -1,0 +1,4 @@
+## 2025-03-04 - Fix Proxy Credential Leakage in Solana Devnet Script
+**Vulnerability:** The script previously printed the entire raw proxy connection string, which contained passwords in plain text, to standard output logs. Additionally, exceptions related to failed network calls exposed raw Python traceback strings that leaked the internal proxy connection string (and passwords again) via urllib/requests errors.
+**Learning:** Raw input strings containing secrets, like `host:port:user:password`, must be properly sanitized or masked before any form of logging. Exception logging must also be guarded against automatically exposing internal state or connection secrets when failures happen.
+**Prevention:** Explicitly separate secrets from logs using masking (e.g., `***`). Never log raw Exception objects directly if the exception originates from a network library handling authenticated requests with proxy/credentials embedded in the URL.
