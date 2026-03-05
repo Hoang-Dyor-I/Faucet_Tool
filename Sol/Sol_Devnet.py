@@ -40,8 +40,8 @@ def request_faucet(wallet, proxy_str):
             print(f"✅ Airdrop thành công cho {wallet}")
         else:
             print(f"❌ Airdrop thất bại cho {wallet} - {response.text}")
-    except Exception as e:
-        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet} - {e}")
+    except Exception:
+        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet}")
     time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
 
 def run_batch(wallets_batch, proxy):
@@ -56,7 +56,12 @@ def run_batch(wallets_batch, proxy):
 def main():
     while True:
         for proxy in proxies:
-            print(f"\n🌐 Đang dùng proxy: {proxy}")
+            try:
+                host, port, user, password = proxy.split(":")
+                masked_proxy = f"{host}:{port}:{user}:***"
+            except ValueError:
+                masked_proxy = "***" # Fallback if proxy format is unexpected
+            print(f"\n🌐 Đang dùng proxy: {masked_proxy}")
             wallet_index = 0
             while wallet_index < len(wallets):
                 num_threads = random.randint(MIN_THREADS, MAX_THREADS)
