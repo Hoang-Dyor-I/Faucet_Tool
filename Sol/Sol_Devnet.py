@@ -17,12 +17,23 @@ wallets = read_lines("wallets.txt")
 proxies = read_lines("proxies.txt")
 
 def get_proxy_dict(proxy_str):
-    host, port, user, password = proxy_str.split(":")
-    proxy_auth = f"{user}:{password}@{host}:{port}"
-    return {
-        "http": f"http://{proxy_auth}",
-        "https": f"http://{proxy_auth}"
-    }
+    parts = proxy_str.split(":")
+    if len(parts) == 4:
+        host, port, user, password = parts
+        proxy_auth = f"{user}:{password}@{host}:{port}"
+        return {
+            "http": f"http://{proxy_auth}",
+            "https": f"http://{proxy_auth}"
+        }
+    elif len(parts) == 2:
+        host, port = parts
+        return {
+            "http": f"http://{host}:{port}",
+            "https": f"http://{host}:{port}"
+        }
+    else:
+        # Invalid proxy format, fallback to returning None or generic
+        return None
 
 def request_faucet(wallet, proxy_str):
     proxy = get_proxy_dict(proxy_str)
@@ -56,7 +67,15 @@ def run_batch(wallets_batch, proxy):
 def main():
     while True:
         for proxy in proxies:
-            print(f"\n🌐 Đang dùng proxy: {proxy}")
+            # Redact proxy password to prevent sensitive data exposure in logs
+            parts = proxy.split(":")
+            if len(parts) == 4:
+                safe_proxy = f"{parts[0]}:{parts[1]}:{parts[2]}:***"
+            elif len(parts) == 2:
+                safe_proxy = proxy # No password to redact
+            else:
+                safe_proxy = "***redacted***"
+            print(f"\n🌐 Đang dùng proxy: {safe_proxy}")
             wallet_index = 0
             while wallet_index < len(wallets):
                 num_threads = random.randint(MIN_THREADS, MAX_THREADS)
