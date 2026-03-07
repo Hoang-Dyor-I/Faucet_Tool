@@ -17,15 +17,21 @@ wallets = read_lines("wallets.txt")
 proxies = read_lines("proxies.txt")
 
 def get_proxy_dict(proxy_str):
-    host, port, user, password = proxy_str.split(":")
-    proxy_auth = f"{user}:{password}@{host}:{port}"
-    return {
-        "http": f"http://{proxy_auth}",
-        "https": f"http://{proxy_auth}"
-    }
+    try:
+        parts = proxy_str.split(":")
+        if len(parts) == 4:
+            return {"http": f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}", "https": f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"}
+        elif len(parts) == 2:
+            return {"http": f"http://{parts[0]}:{parts[1]}", "https": f"http://{parts[0]}:{parts[1]}"}
+    except Exception:
+        pass
+    return None
 
 def request_faucet(wallet, proxy_str):
     proxy = get_proxy_dict(proxy_str)
+    if not proxy:
+        print(f"⚠️ Proxy không hợp lệ cho {wallet}")
+        return
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -56,7 +62,13 @@ def run_batch(wallets_batch, proxy):
 def main():
     while True:
         for proxy in proxies:
-            print(f"\n🌐 Đang dùng proxy: {proxy}")
+            # Mask proxy credentials to avoid plain-text exposure in logs
+            parts = proxy.split(":")
+            if len(parts) == 4:
+                masked_proxy = f"{parts[0]}:{parts[1]}:***:***"
+            else:
+                masked_proxy = proxy
+            print(f"\n🌐 Đang dùng proxy: {masked_proxy}")
             wallet_index = 0
             while wallet_index < len(wallets):
                 num_threads = random.randint(MIN_THREADS, MAX_THREADS)
