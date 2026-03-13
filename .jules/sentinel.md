@@ -1,0 +1,4 @@
+## 2024-05-24 - Masking Proxy Credentials and Exception Information in Logs
+**Vulnerability:** The Solana Devnet script was printing unmasked proxy strings (including user and password) to the terminal, and dumping the raw exception object (`e`) on errors, which could leak sensitive internal request context or proxy configurations in logs.
+**Learning:** Proxy URIs often contain sensitive authentication. Simply printing a proxy configuration directly or using generic print statements with raw exception objects opens up vectors for credential leakage in continuous environments.
+**Prevention:** Always parse or split sensitive strings to isolate and mask credentials (e.g., replace `user:pass` with `***:***`) before logging. Use safe, generic error messages instead of printing full exception objects to prevent internal information exposure.
