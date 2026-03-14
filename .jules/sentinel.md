@@ -1,0 +1,4 @@
+## 2024-03-14 - Exposing Sensitive Credentials and Inner Exception Details
+**Vulnerability:** Proxy credentials (username and password) were being logged in plain text when iterating over proxies. Furthermore, when connection or proxy errors occurred in the `request_faucet` function, the raw exception `e` (which contains sensitive HTTP data, URL traces, or internal mechanisms) was printed out.
+**Learning:** These sensitive logs existed because of lack of credential masking mechanisms and directly relying on `Exception as e` to output error context during network calls.
+**Prevention:** Always use a utility function (like `mask_proxy`) to obfuscate credentials (`***:***`) before logging connection strings. Additionally, replace raw exception details with generic error messages so as not to leak internal network data.
