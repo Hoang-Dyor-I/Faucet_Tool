@@ -1,0 +1,4 @@
+## 2024-05-20 - Custom Proxy Credential Exposure in Logs
+**Vulnerability:** Proxy credentials (user:pass) were logged in plaintext to the console during loop iterations. Exceptions were printing raw trackbacks leaking internals.
+**Learning:** Custom proxy string formats (host:port:user:pass) often get logged in full if not explicitly masked, exposing secrets to log viewers. Similarly, exceptions print raw information which shouldn't be revealed.
+**Prevention:** Always parse or split sensitive strings to isolate and mask credentials before logging. Utilize generic error messages instead of printing the Exception object directly.
