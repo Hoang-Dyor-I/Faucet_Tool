@@ -17,12 +17,26 @@ wallets = read_lines("wallets.txt")
 proxies = read_lines("proxies.txt")
 
 def get_proxy_dict(proxy_str):
-    host, port, user, password = proxy_str.split(":")
-    proxy_auth = f"{user}:{password}@{host}:{port}"
+    parts = proxy_str.split(":")
+    if len(parts) == 4:
+        host, port, user, password = parts
+        proxy_auth = f"{user}:{password}@{host}:{port}"
+    elif len(parts) == 2:
+        host, port = parts
+        proxy_auth = f"{host}:{port}"
+    else:
+        return None
     return {
         "http": f"http://{proxy_auth}",
         "https": f"http://{proxy_auth}"
     }
+
+def mask_proxy(proxy_str):
+    parts = proxy_str.split(":")
+    if len(parts) == 4:
+        host, port, user, password = parts
+        return f"{host}:{port}:***:***"
+    return proxy_str
 
 def request_faucet(wallet, proxy_str):
     proxy = get_proxy_dict(proxy_str)
@@ -39,9 +53,9 @@ def request_faucet(wallet, proxy_str):
         if response.status_code == 200 and "result" in response.json():
             print(f"✅ Airdrop thành công cho {wallet}")
         else:
-            print(f"❌ Airdrop thất bại cho {wallet} - {response.text}")
-    except Exception as e:
-        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet} - {e}")
+            print(f"❌ Airdrop thất bại cho {wallet} - HTTP {response.status_code}")
+    except (requests.exceptions.RequestException, ValueError):
+        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet}")
     time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
 
 def run_batch(wallets_batch, proxy):
@@ -56,7 +70,8 @@ def run_batch(wallets_batch, proxy):
 def main():
     while True:
         for proxy in proxies:
-            print(f"\n🌐 Đang dùng proxy: {proxy}")
+            masked_proxy = mask_proxy(proxy)
+            print(f"\n🌐 Đang dùng proxy: {masked_proxy}")
             wallet_index = 0
             while wallet_index < len(wallets):
                 num_threads = random.randint(MIN_THREADS, MAX_THREADS)
