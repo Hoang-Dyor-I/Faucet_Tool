@@ -1,0 +1,4 @@
+## 2024-05-24 - [Information Exposure] Exposing proxy credentials in logs and exception objects
+**Vulnerability:** The script previously logged full proxy strings (often containing usernames and passwords) to standard output. It also printed out the full exception object which could expose internal system information or details about the network configuration.
+**Learning:** These practices were likely done for easier debugging but unintentionally created a security vulnerability by exposing sensitive credentials and system internals in the logs.
+**Prevention:** Always parse and mask sensitive strings (like proxies) before logging them. When handling exceptions, prefer logging generic, user-friendly error messages rather than the raw exception object to avoid leaking internal information.
