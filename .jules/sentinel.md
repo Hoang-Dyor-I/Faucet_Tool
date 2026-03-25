@@ -1,0 +1,4 @@
+## 2024-03-25 - Proxy Credential Exposure in Logging and Exceptions
+**Vulnerability:** Raw proxy configuration strings (containing host, port, username, and password) and exception objects were being logged in standard output during batch airdrop processing.
+**Learning:** Developers frequently overlook string formatters in print statements where objects like exception payloads or loop variables (e.g., iterating a list of config lines) inherently dump all stringified content without filtering. This creates accidental credential leaks in logs.
+**Prevention:** Always extract and mask sensitive sub-components (e.g., `user:pass`) from configuration lines before passing them to display functions or loggers. Additionally, catch specific exceptions or return safe, generic error descriptors to prevent internal traceback and context object leaks.
