@@ -24,8 +24,7 @@ def get_proxy_dict(proxy_str):
         "https": f"http://{proxy_auth}"
     }
 
-def request_faucet(wallet, proxy_str):
-    proxy = get_proxy_dict(proxy_str)
+def request_faucet(wallet, proxy_dict):
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -35,19 +34,19 @@ def request_faucet(wallet, proxy_str):
     }
 
     try:
-        response = requests.post(FAUCET_URL, json=payload, headers=headers, proxies=proxy, timeout=15)
+        response = requests.post(FAUCET_URL, json=payload, headers=headers, proxies=proxy_dict, timeout=15)
         if response.status_code == 200 and "result" in response.json():
             print(f"✅ Airdrop thành công cho {wallet}")
         else:
             print(f"❌ Airdrop thất bại cho {wallet} - {response.text}")
-    except Exception as e:
-        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet} - {e}")
+    except Exception:
+        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet}")
     time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
 
-def run_batch(wallets_batch, proxy):
+def run_batch(wallets_batch, proxy_dict):
     threads = []
     for wallet in wallets_batch:
-        t = threading.Thread(target=request_faucet, args=(wallet, proxy))
+        t = threading.Thread(target=request_faucet, args=(wallet, proxy_dict))
         t.start()
         threads.append(t)
     for t in threads:
@@ -56,14 +55,27 @@ def run_batch(wallets_batch, proxy):
 def main():
     while True:
         for proxy in proxies:
-            print(f"\n🌐 Đang dùng proxy: {proxy}")
+            parts = proxy.split(":")
+            if len(parts) >= 4:
+                host, port = parts[0], parts[1]
+                masked_proxy = f"{host}:{port}:***:***"
+            else:
+                masked_proxy = proxy
+            print(f"\n🌐 Đang dùng proxy: {masked_proxy}")
+
+            try:
+                proxy_dict = get_proxy_dict(proxy)
+            except Exception:
+                print(f"⚠️ Proxy format error, skipping: {masked_proxy}")
+                continue
+
             wallet_index = 0
             while wallet_index < len(wallets):
                 num_threads = random.randint(MIN_THREADS, MAX_THREADS)
                 wallets_batch = wallets[wallet_index:wallet_index + num_threads]
                 if not wallets_batch:
                     break
-                run_batch(wallets_batch, proxy)
+                run_batch(wallets_batch, proxy_dict)
                 wallet_index += num_threads
                 print(f"⏳ Chờ {REQUEST_INTERVAL} giây trước batch tiếp theo...")
                 time.sleep(REQUEST_INTERVAL)

@@ -1,0 +1,4 @@
+## 2024-05-24 - Fix proxy credentials leak in logs and exceptions
+**Vulnerability:** Proxy credentials (username and password) were being leaked in plaintext via raw logs and unhandled generic exceptions from the `requests` library when making network calls in the Airdrop script.
+**Learning:** Generic exceptions from network libraries like `requests` often contain the full URL, including HTTP Basic Auth credentials, when a connection fails. Passing raw proxy strings to logging statements also prints secrets directly to the output.
+**Prevention:** Always parse or split sensitive strings (e.g., proxy configurations) to isolate and mask credentials (user:pass) before logging. Catch specific exceptions or use safe, generic error messages instead of printing full exception objects (`Exception as e`) to prevent internal information exposure.
