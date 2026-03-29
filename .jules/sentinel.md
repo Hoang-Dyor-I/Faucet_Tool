@@ -1,0 +1,7 @@
+## 2024-05-24 - Exposed Proxy Credentials in Logs and Exception Handling
+**Vulnerability:** The Solana Devnet script logged raw proxy strings directly to standard output, which leaked proxy authentication credentials (username:password). Additionally, unhandled exception blocks logged full exception traces (`Exception as e`), potentially leaking system, internal state, or network specifics on connection failure.
+**Learning:** Hardcoded logs or raw string representations of authentication mechanisms (like proxies, DB URIs) can inadvertently act as a data leak channel in automation scripts. The global initialization of files (`wallets.txt`, `proxies.txt`) also caused the module to run statefully upon import, lacking fault tolerance.
+**Prevention:**
+1. **Mask Sensitive Data:** Implement utility functions (`mask_proxy`) that split and redact credentials before logging data configurations.
+2. **Fail Securely & Validate Early:** Break configurations down immediately (e.g. proxy split) and check for structural integrity (e.g. exactly 4 elements). Return `None` on failure, and explicitly abort routines that depend on that config (e.g. `request_faucet` aborts if proxy is `None`) to prevent fallback defaults that expose the local machine's IP.
+3. **Generic Error Messages:** Standardize the `except Exception` blocks to catch errors but only log a static, generic error message rather than appending the actual exception instance.
