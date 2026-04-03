@@ -1,0 +1,4 @@
+## 2024-04-03 - Exposing Proxy Credentials in Logs and Potential Local IP Leaks
+**Vulnerability:** The script prints plain-text proxy credentials (`user:password`) in `main()`. In addition, `get_proxy_dict` does not properly validate proxy format, and `request_faucet` could theoretically send requests without a proxy if proxy configuration fails, exposing the user's local IP address. Stack traces and full error objects were logged on exceptions.
+**Learning:** Proxy strings must always be masked before logging, and network requests must fail securely if proxy configuration is invalid.
+**Prevention:** Add a helper to mask sensitive credentials before any print statement. Validate proxy structure strictly and abort requests if the proxy configuration is invalid. Never print full Exception objects to logs.
