@@ -1,0 +1,4 @@
+## 2025-04-05 - Fix exposed credentials and internal state in logs
+**Vulnerability:** Proxy credentials (username/password) were printed directly to console logs. Malformed proxy strings could cause the local IP to be leaked, and error handling printed the full exception object instead of generic error messages.
+**Learning:** Hardcoded and dynamic sensitive variables in logs are common. Validation of proxy strings must be done before requests are made to prevent execution with invalid configurations. Error states should gracefully exit or emit a generic error message type to limit internal info disclosure.
+**Prevention:** Mask proxy strings using a `mask_proxy` function before logging them. Always assert structure completeness (e.g., 4 parts of `host:port:user:pass`) and prevent executing requests with malformed configs. Print `type(e).__name__` instead of full exception output.
