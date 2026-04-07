@@ -1,0 +1,4 @@
+## 2025-02-14 - Fix proxy credential leak and local IP leak
+**Vulnerability:** Proxy credentials (username/password) were printed in plaintext in logs, full system exception objects were leaked on connection errors, proxy formats were unvalidated which could result in proxy-less connection and local IP exposure, and global module execution occurred upon import.
+**Learning:** Hardcoded logs combined with missing input validation for environment/proxy setup strings lead directly to critical system information exposure and unintended execution flows.
+**Prevention:** Always validate external strings representing sensitive components (like proxies). Mask credentials using helper functions before logging. Catch and log only exception types, not full objects. Use `if __name__ == "__main__":` blocks and encapsulate setup logic inside functions to avoid side effects during imports.
