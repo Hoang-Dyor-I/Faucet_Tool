@@ -1,0 +1,4 @@
+## 2024-05-18 - [Exposed Proxy Credentials and Stack Traces]
+**Vulnerability:** Proxy credentials (username/password) were being printed in plain text to console logs, and exception stack traces were being printed upon request failure, potentially exposing local file paths or dependency details.
+**Learning:** Hardcoded string prints without consideration for credential presence (e.g. `user:pass@host:port`) and raw exception printing (`print(e)`) leak internal state. Also, failure to validate proxy structures led to the script silently proceeding with the user's local IP on failure.
+**Prevention:** Implement proactive proxy credential redaction (`mask_proxy` function) before logging. Restrict error logging to exception types (`type(e).__name__`). Return early gracefully upon proxy initialization failure.
