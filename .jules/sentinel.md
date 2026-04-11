@@ -1,0 +1,4 @@
+## 2024-04-11 - Prevent Plain Text Credentials in Logs
+**Vulnerability:** The proxy strings containing `host:port:user:password` were printed directly to the console during execution, exposing credentials. Furthermore, global exceptions included full stack traces, which could expose internal data including the proxy configuration.
+**Learning:** Hardcoded print statements displaying configuration structures can easily leak sensitive data if not sanitized properly. Global error catching (`except Exception as e`) that prints the full exception object can also inadvertently leak proxy credentials or network URIs.
+**Prevention:** Always use a sanitization function to mask secrets (e.g., replace `user:password` with `***:***`) before logging configurations. When handling global exceptions, log safe generic messages or just the exception type name (`type(e).__name__`) instead of the full error object.
