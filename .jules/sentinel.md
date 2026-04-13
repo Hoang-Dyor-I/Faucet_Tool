@@ -1,0 +1,4 @@
+## 2025-04-13 - [Exposed Proxy Credentials in Logs and Un-proxied Local IP Leak]
+**Vulnerability:** The script was printing the full proxy connection string containing sensitive credentials (`user:password`) to standard output logs in `main()`. Also, requests would fall back to sending directly from the local IP if the proxy string was malformed because the proxy dict returned was ignored instead of enforcing a hard abort. Exception objects were printed fully, leaking internal structures.
+**Learning:** Hardcoded simple string formats and missing error validation lead directly to sensitive data leaks when building generic string combinations for proxy requests or logs.
+**Prevention:** Always parse or split sensitive strings to isolate and mask credentials before logging. Gracefully handle proxies without credentials and fail-safe (abort) to prevent leaking the local IP. Use safe generic error messages instead of full exception objects.
