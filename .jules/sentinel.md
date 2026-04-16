@@ -1,0 +1,4 @@
+## 2024-04-16 - Prevent Leaking Sensitive Information in Logs
+**Vulnerability:** The script previously printed raw exception objects and plain-text proxy strings (including credentials) in error logs, which can inadvertently expose sensitive data.
+**Learning:** Hardcoding credentials or passing sensitive string literals into logger instances without sanitization is a common anti-pattern that violates "secure logging conventions". Exception stack traces shouldn't be fully exposed as they leak internal mechanics.
+**Prevention:** Isolate and manually parse proxy configurations to isolate credentials (`user:password`). Implement a `mask_proxy` function which replaces credentials with asterisks before printing them. Catch exceptions gracefully and report only the `type(e).__name__` instead of the raw error text.
