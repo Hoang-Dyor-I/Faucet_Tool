@@ -17,15 +17,29 @@ wallets = read_lines("wallets.txt")
 proxies = read_lines("proxies.txt")
 
 def get_proxy_dict(proxy_str):
-    host, port, user, password = proxy_str.split(":")
-    proxy_auth = f"{user}:{password}@{host}:{port}"
-    return {
-        "http": f"http://{proxy_auth}",
-        "https": f"http://{proxy_auth}"
-    }
+    parts = proxy_str.split(":")
+    if len(parts) == 4:
+        host, port, user, password = parts
+        proxy_auth = f"{user}:{password}@{host}:{port}"
+        return {
+            "http": f"http://{proxy_auth}",
+            "https": f"http://{proxy_auth}"
+        }
+    elif len(parts) == 2:
+        host, port = parts
+        proxy_auth = f"{host}:{port}"
+        return {
+            "http": f"http://{proxy_auth}",
+            "https": f"http://{proxy_auth}"
+        }
+    return None
 
 def request_faucet(wallet, proxy_str):
     proxy = get_proxy_dict(proxy_str)
+    if proxy is None:
+        time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
+        return
+
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -40,8 +54,8 @@ def request_faucet(wallet, proxy_str):
             print(f"✅ Airdrop thành công cho {wallet}")
         else:
             print(f"❌ Airdrop thất bại cho {wallet} - {response.text}")
-    except Exception as e:
-        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet} - {e}")
+    except Exception:
+        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet}")
     time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
 
 def run_batch(wallets_batch, proxy):
@@ -56,7 +70,12 @@ def run_batch(wallets_batch, proxy):
 def main():
     while True:
         for proxy in proxies:
-            print(f"\n🌐 Đang dùng proxy: {proxy}")
+            parts = proxy.split(":")
+            if len(parts) >= 4:
+                safe_proxy = f"{parts[0]}:{parts[1]}:{parts[2]}:***"
+            else:
+                safe_proxy = proxy
+            print(f"\n🌐 Đang dùng proxy: {safe_proxy}")
             wallet_index = 0
             while wallet_index < len(wallets):
                 num_threads = random.randint(MIN_THREADS, MAX_THREADS)
