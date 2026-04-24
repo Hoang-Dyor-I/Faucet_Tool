@@ -13,19 +13,24 @@ def read_lines(filename):
     with open(filename, "r") as f:
         return [line.strip() for line in f if line.strip()]
 
-wallets = read_lines("wallets.txt")
-proxies = read_lines("proxies.txt")
-
 def get_proxy_dict(proxy_str):
-    host, port, user, password = proxy_str.split(":")
+    parts = proxy_str.split(":")
+    if len(parts) != 4:
+        return None
+    host, port, user, password = parts
     proxy_auth = f"{user}:{password}@{host}:{port}"
     return {
         "http": f"http://{proxy_auth}",
         "https": f"http://{proxy_auth}"
     }
 
-def request_faucet(wallet, proxy_str):
-    proxy = get_proxy_dict(proxy_str)
+def request_faucet(wallet, proxy_dict):
+    if not proxy_dict:
+        print(f"⚠️ Lỗi proxy không hợp lệ cho {wallet}")
+        time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
+        return
+
+    proxy = proxy_dict
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -40,30 +45,40 @@ def request_faucet(wallet, proxy_str):
             print(f"✅ Airdrop thành công cho {wallet}")
         else:
             print(f"❌ Airdrop thất bại cho {wallet} - {response.text}")
-    except Exception as e:
-        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet} - {e}")
+    except Exception:
+        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet}")
     time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
 
-def run_batch(wallets_batch, proxy):
+def run_batch(wallets_batch, proxy_dict):
     threads = []
     for wallet in wallets_batch:
-        t = threading.Thread(target=request_faucet, args=(wallet, proxy))
+        t = threading.Thread(target=request_faucet, args=(wallet, proxy_dict))
         t.start()
         threads.append(t)
     for t in threads:
         t.join()
 
 def main():
+    try:
+        wallets = read_lines("wallets.txt")
+        proxies = read_lines("proxies.txt")
+    except Exception:
+        print("⚠️ Lỗi đọc file cấu hình")
+        return
+
     while True:
         for proxy in proxies:
-            print(f"\n🌐 Đang dùng proxy: {proxy}")
+            proxy_dict = get_proxy_dict(proxy)
+            parts = proxy.split(":")
+            display_proxy = f"{parts[0]}:{parts[1]}" if len(parts) >= 2 else "unknown"
+            print(f"\n🌐 Đang dùng proxy: {display_proxy}")
             wallet_index = 0
             while wallet_index < len(wallets):
                 num_threads = random.randint(MIN_THREADS, MAX_THREADS)
                 wallets_batch = wallets[wallet_index:wallet_index + num_threads]
                 if not wallets_batch:
                     break
-                run_batch(wallets_batch, proxy)
+                run_batch(wallets_batch, proxy_dict)
                 wallet_index += num_threads
                 print(f"⏳ Chờ {REQUEST_INTERVAL} giây trước batch tiếp theo...")
                 time.sleep(REQUEST_INTERVAL)
