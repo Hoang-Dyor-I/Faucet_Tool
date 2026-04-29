@@ -24,6 +24,12 @@ def get_proxy_dict(proxy_str):
         "https": f"http://{proxy_auth}"
     }
 
+def mask_proxy(proxy_str):
+    parts = proxy_str.split(":")
+    if len(parts) == 4:
+        return f"{parts[0]}:{parts[1]}:{parts[2]}:***"
+    return proxy_str
+
 def request_faucet(wallet, proxy_str):
     proxy = get_proxy_dict(proxy_str)
     headers = {"Content-Type": "application/json"}
@@ -41,7 +47,7 @@ def request_faucet(wallet, proxy_str):
         else:
             print(f"❌ Airdrop thất bại cho {wallet} - {response.text}")
     except Exception as e:
-        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet} - {e}")
+        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet}")
     time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
 
 def run_batch(wallets_batch, proxy):
@@ -56,7 +62,7 @@ def run_batch(wallets_batch, proxy):
 def main():
     while True:
         for proxy in proxies:
-            print(f"\n🌐 Đang dùng proxy: {proxy}")
+            print(f"\n🌐 Đang dùng proxy: {mask_proxy(proxy)}")
             wallet_index = 0
             while wallet_index < len(wallets):
                 num_threads = random.randint(MIN_THREADS, MAX_THREADS)
