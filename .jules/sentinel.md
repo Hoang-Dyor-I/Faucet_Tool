@@ -1,0 +1,4 @@
+## 2024-05-24 - Fix exposed sensitive data in logs
+**Vulnerability:** Proxy credentials (passwords) and raw exception objects were being exposed in standard output logs, creating a potential leak of internal infrastructure details and authentication tokens. Furthermore, proxy credentials were not properly URL-encoded, allowing special characters to break formatting.
+**Learning:** Raw string formatting of proxy dictionaries into connection strings exposes secrets in downstream library logs or internal tracking if an exception is serialized.
+**Prevention:** Always implement masking functions for credential-bearing strings prior to logging, and use `urllib.parse.quote` to percent-encode structural parameters in URLs. Avoid printing full raw `Exception` instances; log generic messages instead.
