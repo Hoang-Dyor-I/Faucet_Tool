@@ -1,0 +1,5 @@
+
+## 2024-05-15 - Exposure of proxy credentials in logs and unhandled exceptions
+**Vulnerability:** Proxy credentials (username/password) were being printed in plaintext to standard output via `print(f"\n🌐 Đang dùng proxy: {proxy}")` and unhandled exception details (`response.text` and `Exception as e`) were being logged to the console, exposing sensitive server responses and internal connection strings. Furthermore, special characters in passwords weren't properly URL-encoded.
+**Learning:** This occurred due to blindly logging connection states and relying on default print representations of raw proxy configuration strings, coupled with a lack of input sanitization during string formatting.
+**Prevention:** Always implement masking functions for sensitive connection strings prior to logging. Use `urllib.parse.quote` to safely encode credentials. Catch specific exceptions (like `requests.exceptions.RequestException`) and use generic fallback error messages instead of printing raw exception objects or server responses.

@@ -2,6 +2,7 @@ import requests
 import random
 import time
 import threading
+import urllib.parse
 
 FAUCET_URL = "https://api.devnet.solana.com"
 MIN_THREADS = 20
@@ -13,19 +14,30 @@ def read_lines(filename):
     with open(filename, "r") as f:
         return [line.strip() for line in f if line.strip()]
 
-wallets = read_lines("wallets.txt")
-proxies = read_lines("proxies.txt")
-
 def get_proxy_dict(proxy_str):
-    host, port, user, password = proxy_str.split(":")
-    proxy_auth = f"{user}:{password}@{host}:{port}"
-    return {
-        "http": f"http://{proxy_auth}",
-        "https": f"http://{proxy_auth}"
-    }
+    try:
+        host, port, user, password = proxy_str.split(":", 3)
+        user_enc = urllib.parse.quote(user, safe='')
+        pass_enc = urllib.parse.quote(password, safe='')
+        proxy_auth = f"{user_enc}:{pass_enc}@{host}:{port}"
+        return {
+            "http": f"http://{proxy_auth}",
+            "https": f"http://{proxy_auth}"
+        }
+    except ValueError:
+        return None
 
-def request_faucet(wallet, proxy_str):
-    proxy = get_proxy_dict(proxy_str)
+def mask_proxy(proxy_str):
+    parts = proxy_str.split(":", 3)
+    if len(parts) == 4:
+        return f"{parts[0]}:{parts[1]}:{parts[2]}:***"
+    return "***"
+
+def request_faucet(wallet, proxy):
+    if proxy is None:
+        time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
+        return
+
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -39,9 +51,9 @@ def request_faucet(wallet, proxy_str):
         if response.status_code == 200 and "result" in response.json():
             print(f"✅ Airdrop thành công cho {wallet}")
         else:
-            print(f"❌ Airdrop thất bại cho {wallet} - {response.text}")
-    except Exception as e:
-        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet} - {e}")
+            print(f"❌ Airdrop thất bại cho {wallet} - Lỗi từ server")
+    except requests.exceptions.RequestException:
+        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet}")
     time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
 
 def run_batch(wallets_batch, proxy):
@@ -54,9 +66,17 @@ def run_batch(wallets_batch, proxy):
         t.join()
 
 def main():
+    try:
+        wallets = read_lines("wallets.txt")
+        proxies = read_lines("proxies.txt")
+    except FileNotFoundError as e:
+        print(f"Lỗi: Không tìm thấy file cấu hình - {e.filename}")
+        return
+
     while True:
-        for proxy in proxies:
-            print(f"\n🌐 Đang dùng proxy: {proxy}")
+        for proxy_str in proxies:
+            print(f"\n🌐 Đang dùng proxy: {mask_proxy(proxy_str)}")
+            proxy = get_proxy_dict(proxy_str)
             wallet_index = 0
             while wallet_index < len(wallets):
                 num_threads = random.randint(MIN_THREADS, MAX_THREADS)
