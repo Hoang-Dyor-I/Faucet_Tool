@@ -1,0 +1,4 @@
+## 2024-06-03 - Credential Leak in Proxy Exceptions
+**Vulnerability:** Raw exception objects in `Sol/Sol_Devnet.py` were printed to the console on proxy or connection errors, leaking proxy URLs with plaintext credentials (e.g., `http://user:password@host:port`). Additionally, proxy strings were not URL-encoded and logged unmasked.
+**Learning:** The `requests` library includes the full proxy URL in exceptions like `ProxyError`. Catching general exceptions and printing them directly exposes these internal details. Passwords containing colons or special characters can also cause parsing and request failures if not properly split (`maxsplit=3`) and URL-encoded.
+**Prevention:** Sanitize exception messages using regex (e.g., `re.sub(r'(://[^:]+:)[^@]+(@)', r'\1***\2', str(e))`) before logging. Use `urllib.parse.quote` for proxy credentials, and pre-mask URLs/proxy strings before any console output.
