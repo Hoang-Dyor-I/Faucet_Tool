@@ -1,0 +1,4 @@
+## 2024-06-05 - Credential Leakage in Proxy Exceptions and Logs
+**Vulnerability:** Proxy credentials (username and password) were exposed in plaintext in standard output logs and potentially in `requests` exception messages if a connection error occurred. Additionally, credentials containing special characters like `@` were not URL-encoded, creating potential injection/parsing issues.
+**Learning:** When dealing with proxy URLs, naive string splitting without bounds checking and printing raw request exception objects can leak sensitive components embedded in the URL.
+**Prevention:** Always use regex sanitization on exception messages (`re.sub(r'(://[^:]+:).*?(@)', r'\1***\2', str(e))`), explicitly `mask_proxy` strings for logs, and use `urllib.parse.quote` for encoding credentials before URL composition.
