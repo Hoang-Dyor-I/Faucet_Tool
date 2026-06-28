@@ -1,0 +1,4 @@
+## 2024-06-28 - Secure Logging of Proxy Credentials
+**Vulnerability:** Proxy credentials (passwords) were exposed in plain text within console logs and raw exception stack traces. Unencoded credentials in URLs could also lead to injection-like errors.
+**Learning:** Raw proxy strings loaded from local storage often contain sensitive information. Global variables for I/O operations create side effects. `Exception` stringification in network requests (like `requests`) can inadvertently log full URLs including passwords.
+**Prevention:** Implement proxy masking (`host:port:user:***`) before logging. Sanitize exception messages using regex `re.sub(r'(://[^:]+:).*?(@)', r'\1***\2', str(e))` to hide credentials. Always URL-encode user/password in proxy strings. Avoid reading files at the module level.
