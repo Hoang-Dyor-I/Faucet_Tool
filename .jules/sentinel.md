@@ -1,0 +1,4 @@
+## 2024-07-06 - Credential Leak in Proxy Logging and Exception Handling
+**Vulnerability:** Application leaked plaintext proxy passwords in console logs when displaying the current proxy, and in unhandled exception traces from the requests library which included the full proxy URL. Additionally, credentials were not URL-encoded, risking injection attacks.
+**Learning:** Third-party libraries like `requests` can expose sensitive credentials embedded in URLs within their exception messages. Simple string splitting can also truncate passwords if they contain the delimiter character (e.g., `:`).
+**Prevention:** Always mask sensitive strings before logging, explicitly sanitize exception messages containing URLs using non-greedy regex, URL-encode credentials before building URLs, and restrict string splitting (e.g., using `maxsplit`) to preserve password integrity.
