@@ -1,0 +1,4 @@
+## 2024-05-24 - Unhandled Exception Proxy Credential Leak
+**Vulnerability:** The script leaked proxy plaintext credentials (username and password) to the console when `requests.post` raised an exception (like a connection error), because it printed the raw exception object which included the full proxy URL. The credentials were also unencoded in URLs, risking injection.
+**Learning:** Network library exceptions (like in `requests`) often include the full URL they attempted to connect to, which can expose embedded credentials if not properly sanitized before logging or displaying.
+**Prevention:** Always percent-encode credentials in URLs. Sanitize exception messages using regex (e.g., `re.sub(r'(://[^:]+:).*?(@)', r'\1***\2', str(e))`) before printing/logging to ensure credentials are masked.
