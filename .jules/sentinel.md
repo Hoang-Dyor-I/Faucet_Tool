@@ -1,0 +1,4 @@
+## 2024-07-24 - Exposed Proxy Credentials in Logs and Network Requests
+**Vulnerability:** Plaintext proxy credentials (passwords) were exposed in console logs (via direct printing and unhandled Exception messages) and were vulnerable to injection via unencoded special characters in URLs.
+**Learning:** `requests` exception objects can include the request URL in plaintext, which leaks embedded basic auth credentials. Also, `split(":")` without maxsplit limits breaks on passwords containing colons.
+**Prevention:** Always use regex (`re.sub(r'(://[^:]+:).*?(@)', r'\1***\2', str(e))`) to sanitize `requests` error messages, implement a dedicated credential masking function for custom logs, URL-encode credentials using `urllib.parse.quote`, and use `maxsplit=3` when parsing credentials containing delimiters.
