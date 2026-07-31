@@ -1,0 +1,4 @@
+## 2024-07-31 - Fix credential leak in logs and exceptions
+**Vulnerability:** Proxy credentials (username and password) were exposed in plaintext in the console output when logging the active proxy, and could be leaked via `requests.exceptions.ProxyError` when unhandled exception strings were printed. In addition, credentials were not percent-encoded, which could lead to injection or invalid URLs.
+**Learning:** Raw exception objects and connection strings should always be sanitized before logging, as standard library errors (like from `requests`) often echo the offending URL, including inline credentials.
+**Prevention:** Apply a regex mask (e.g., `re.sub(r'(://[^:]+:).*?(@)', r'\1***\2', str(e))`) to all exception logs related to network calls, and ensure credentials are parsed, percent-encoded with `urllib.parse.quote`, and explicitly masked before intentional logging.
