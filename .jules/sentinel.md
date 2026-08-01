@@ -1,0 +1,4 @@
+## 2024-08-01 - Prevent Credential Exposure in Logs
+**Vulnerability:** Plaintext proxy credentials (username and password) were exposed in terminal output via `print()` and in unhandled exception stack traces from the `requests` library.
+**Learning:** Raw exception outputs or unmasked proxy strings can leak sensitive information. When `requests` encounters a proxy error, it may output the full proxy URL including plaintext credentials.
+**Prevention:** Always implement a masking function (e.g., `mask_proxy`) before logging proxy strings. Sanitize exception messages using regex (e.g., `re.sub(r'(://[^:]+:).*?(@)', r'\1***\2', str(e))`) to strip passwords while maintaining debugging context. Additionally, use `maxsplit=3` when parsing credentials and properly URL-encode usernames and passwords to prevent injection or parse errors with special characters.
