@@ -1,0 +1,4 @@
+## 2024-05-15 - [Credential Leakage in Request Exceptions & Unencoded Proxy Passwords]
+**Vulnerability:** Proxy credentials (passwords with special characters) were unencoded in URLs, and `requests` exception logging leaked full plaintext credentials because it printed the exact string constructed for the proxy URL.
+**Learning:** `requests` percent-encodes credentials in its error output, which affects how regex matchers operate on the string, and unhandled exception logging can inadvertently leak sensitive proxy/auth configurations to standard output.
+**Prevention:** Always percent-encode credentials using `urllib.parse.quote` for URL construction. Always sanitize exception output streams (using non-greedy regex replacing between `://` and `@`) when dealing with URIs that contain inline authentication.
