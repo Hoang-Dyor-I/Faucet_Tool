@@ -1,0 +1,4 @@
+## 2024-08-12 - Prevent Credential Leakage in Proxy Logs and Exceptions
+**Vulnerability:** Proxy credentials (username and password) were being logged in plaintext to standard output during script execution and were also exposed in raw exception messages thrown by the `requests` library.
+**Learning:** Raw string formatting of proxy connection strings without masking will leak credentials into application logs. Additionally, networking libraries like `requests` may include the full proxy URL (with percent-encoded credentials) in their error messages on connection failure, which must be sanitized before logging.
+**Prevention:** Always implement a masking function (e.g., parsing the string and replacing the password portion with asterisks) before logging connection URIs. For exception handling, apply a regex (e.g., `re.sub(r'(://[^:@/]+:)[^:@/]+(@)', r'\1***\2', str(e))`) to redact encoded credentials from error traces.
