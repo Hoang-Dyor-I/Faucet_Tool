@@ -1,0 +1,4 @@
+## 2024-08-13 - [Proxy Credential Exposure & URL Encoding Fixes]
+**Vulnerability:** Proxy credentials (passwords) were exposed in plain text within console logs during script execution and within stringified network `Exception` objects. Additionally, proxy passwords with special characters were not URL-encoded, causing request connection errors.
+**Learning:** Failing to sanitize exception messages inherently tied to network connections (like `requests` errors) can leak sensitive proxy URLs in logs. Lack of proper percent-encoding (`urllib.parse.quote`) on raw string inputs can lead to bad URI structure when assembling proxy authentication strings.
+**Prevention:** Always implement robust sanitization (e.g., regex `re.sub` replacement) to mask credentials on exception objects before logging or returning them. Ensure all user-provided strings used in URL constructions are percent-encoded to prevent protocol parsing failures.
