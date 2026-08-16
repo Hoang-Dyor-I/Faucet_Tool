@@ -1,0 +1,4 @@
+## 2024-08-16 - Exposed Proxy Credentials in Logs and Error Messages
+**Vulnerability:** The Solana devnet script prints raw proxy connection strings containing plain-text usernames and passwords to the console and exposes them in unhandled exception traces. Proxy credentials were also not URL-encoded, leading to potential injection or parsing errors.
+**Learning:** Hardcoded or dynamically read secrets can easily leak via standard output (print statements) and implicit error strings (like request exceptions) if not explicitly sanitized. Passing unencoded credentials to URL-based APIs poses an injection risk.
+**Prevention:** Always mask sensitive parts of connection strings (e.g. `user:***`) before logging. Sanitize exception strings using regex to mask passwords in URLs. URL-encode credentials using `urllib.parse.quote` before constructing connection URIs.
