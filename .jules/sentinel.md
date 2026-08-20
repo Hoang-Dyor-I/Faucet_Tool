@@ -1,0 +1,7 @@
+## 2024-08-20 - Log Credential Leakage in Proxy Exceptions
+**Vulnerability:** Proxy credentials (username and password) were being leaked in plaintext to stdout when an exception was caught during a requests.post call (`print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet} - {e}")`). The `requests` exception object converts `e` to a string which includes the full proxy URL containing the plaintext password. Additionally, unmasked proxy strings were logged to the console before processing (`print(f"\n🌐 Đang dùng proxy: {proxy}")`).
+**Learning:** Using raw proxy strings (host:port:user:pass) and passing them directly into Python's `requests` library proxies dictionary formats them into URLs. When exceptions like ConnectionError occur, `requests` embeds these full URLs in the exception message. Printing the raw exception object (`e`) stringifies it, thus exposing credentials to logs or stdout.
+**Prevention:**
+1. Avoid logging raw proxy configuration strings. Implement a function to mask passwords in proxy strings before logging (e.g., `user:***@host:port`).
+2. When catching and logging exceptions during network requests using proxies, sanitize the exception string using regex (e.g., `re.sub(r'(://[^:@/]+:)[^:@/]+(@)', r'\1***\2', str(e))`) before printing.
+3. Use `urllib.parse.quote` for username and password to ensure special characters don't break the URL scheme, and ensure `requests` properly url-encodes it in its output for regex to match `%40`, etc.
