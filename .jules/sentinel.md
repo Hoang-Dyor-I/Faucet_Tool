@@ -1,0 +1,4 @@
+## 2024-05-30 - Prevent Credential Leakage in Proxy Configurations
+**Vulnerability:** Proxy credentials (username/password) were logged in plaintext to the console and potentially leaked via unhandled `requests` exceptions. Credentials containing special characters (like `:`) caused `split` to fail, and were not URL-encoded for proxy authentication.
+**Learning:** Automated network tools often use proxy strings in the format `host:port:user:pass`. When these strings are processed, printed, or cause exceptions, they expose sensitive secrets. Furthermore, special characters must be properly bounded (`maxsplit`) and URL-encoded.
+**Prevention:** Always parse, mask (using `maxsplit=3`), and URL-encode proxy strings before logging or usage. Apply targeted regex sanitization `re.sub(r'(://[^:]+:).*?(@[^@/]+(?:/|$))', r'\1***\2', str(e))` to mask credentials in exception tracebacks before they hit the console.
