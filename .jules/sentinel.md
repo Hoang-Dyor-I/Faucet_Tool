@@ -1,0 +1,4 @@
+## 2024-08-24 - Secure Proxy Credential Handling
+**Vulnerability:** Proxy credentials (passwords with special characters like '@' or ':') in `get_proxy_dict` were not percent-encoded, leading to invalid URL construction. Also, raw proxy strings and exception objects were logged directly, leaking plain-text passwords to console output.
+**Learning:** The `requests` library expects properly URL-encoded credentials when passed in a proxy dictionary. If not encoded, characters like '@' break the URL parsing. Additionally, exception objects from `requests` will automatically include the URL (and credentials), meaning we must actively sanitize exceptions before logging.
+**Prevention:** Always use `urllib.parse.quote(value, safe='')` to percent-encode credentials when constructing proxy URLs. Use custom masking functions (e.g., regex sanitization) to redact passwords from exceptions and log messages before printing.
