@@ -1,0 +1,4 @@
+## 2024-05-15 - Prevent Proxy Credentials Leakage in Logs and Exceptions
+**Vulnerability:** Proxy credentials (passwords with colons or special chars) were leaked in plaintext in stdout via logging proxy strings and propagating raw `requests` exception messages. Additionally, lack of URL encoding for proxy user/password caused request failures on special characters.
+**Learning:** Raw exception strings from `requests` module often include the full URL with plaintext/percent-encoded credentials. `print(e)` directly exposes these. Moreover, splitting credentials requires careful bounds (`maxsplit`) to preserve colons in passwords.
+**Prevention:** Always parse or split sensitive strings to isolate/mask credentials before logging. Use regex `re.sub(r'(://[^:]+:).*?(@[^@/]+(?:/|$))', r'\1***\2', str(e))` to sanitize exception messages. URL-encode proxy username and password using `urllib.parse.quote(..., safe='')` before composing the connection string.
