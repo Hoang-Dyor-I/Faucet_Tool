@@ -1,0 +1,4 @@
+## 2024-08-27 - [Fix Plaintext Proxy Credential Leakage]
+**Vulnerability:** The Solana devnet script logged proxy credentials in plaintext to the console and in unhandled request exception stack traces.
+**Learning:** Proxy strings containing standard HTTP basic auth structure naturally log plain credentials if printed directly. Furthermore, requests libraries embed url-encoded credentials in exception outputs when proxy connections fail.
+**Prevention:** Sanitize exception strings via regex matching HTTP auth patterns to mask passwords before printing. Always encapsulate proxy passwords when generating user-visible logging strings, ensuring they are separated from the underlying requests library configuration.
