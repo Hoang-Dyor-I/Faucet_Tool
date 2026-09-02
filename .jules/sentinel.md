@@ -1,0 +1,4 @@
+## 2024-09-02 - Proxy Credential Exposure in Error Logs and Injection in URL
+**Vulnerability:** Proxy passwords containing special characters (like `:` or `@`) were injected without URL encoding into the proxy URL string. Furthermore, proxy credentials (passwords) were exposed in plaintext in the console logs through both the proxy log output and raw exception string traces from `requests.post`.
+**Learning:** The `requests` library automatically percent-encodes credentials in its error output, meaning custom regex logic needs to handle encoded representations. Furthermore, printing unhandled exception logs can trivially leak embedded secrets in connection strings.
+**Prevention:** Use `urllib.parse.quote` for proxy credentials before embedding them in URLs, implement custom mask functions (`mask_proxy`) before logging sensitive variables, and sanitize exception objects (e.g. `re.sub`) before casting them to strings for logs.
