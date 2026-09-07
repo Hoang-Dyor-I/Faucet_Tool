@@ -1,0 +1,4 @@
+## 2024-09-07 - Fix exposed proxy credentials in logs and unencoded proxy auth
+**Vulnerability:** Proxy credentials (passwords) were exposed in plain text in console logs and exception tracebacks. Proxy passwords with special characters were not URL encoded, leading to malformed URLs when constructing the proxy dictionary.
+**Learning:** The `requests` library automatically percent-encodes credentials in exception outputs, which requires sanitization logic using regex. Also, failing to `urllib.parse.quote()` passwords containing characters like '@' or ':' breaks proxy URL construction.
+**Prevention:** Always use `urllib.parse.quote(value, safe='')` when constructing URL credentials from raw proxy strings. Use regex to sanitize exception tracebacks or use helper functions to redact passwords in logging outputs.
