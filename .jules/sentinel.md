@@ -1,0 +1,4 @@
+## 2024-09-09 - Exposed Proxy Credentials in Logs and Exceptions
+**Vulnerability:** Proxy credentials (username and password) were being logged in plaintext when printing the proxy string in the main loop, and exception handling in `request_faucet` could leak the URL with credentials if `requests` failed.
+**Learning:** `requests` automatically percent-encodes credentials in exception messages, but they still leak if raw exception strings are printed. Additionally, printing raw proxy config strings exposes secrets to the console.
+**Prevention:** Always parse or split sensitive strings to isolate and mask credentials before logging. Use regex to sanitize exception strings (`re.sub(r'(://[^:]+:).*?(@[^@/]+(?:/|$))', r'\1***\2', str(e))`) to securely mask passwords while preserving debugging context.
