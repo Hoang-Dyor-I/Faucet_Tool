@@ -1,0 +1,4 @@
+## 2024-05-24 - Proxy Credential Leakage in Logging and Error Handling
+**Vulnerability:** Proxy credentials (username and password) are exposed in plaintext through standard console logging and potentially through requests library exception messages. Additionally, credentials with special characters are not safely URL-encoded.
+**Learning:** Hardcoded print statements and raw exception casting can inadvertently leak sensitive proxy authentication details to logs, while improper parsing (lack of maxsplit) can break passwords containing colons.
+**Prevention:** Always parse, URL-encode, and mask credentials before logging. Sanitize exception strings using regex to redact credentials, use maxsplit=3 when parsing `host:port:user:pass` formats, and ensure safe delay handling when skipping invalid proxies to prevent fast-loops.
