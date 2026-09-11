@@ -1,0 +1,4 @@
+## 2024-05-24 - Prevent Credential Leakage in Logs and Exception Messages
+**Vulnerability:** Proxy credentials (username and password) were being logged in plaintext to standard output and could also be leaked if network exceptions (like `requests` ProxyError) containing URL-encoded proxy URLs were unhandled and printed.
+**Learning:** Raw exception strings from network libraries and dynamically generated strings from unsanitized user/configuration input often retain sensitive information and structure, making them unsafe to print directly without deliberate masking and sanitization.
+**Prevention:** Always URL-encode credentials when constructing proxy URLs. Use strict string splitting (`maxsplit=3`) and explicitly mask credentials before logging. For network exceptions, implement robust regex-based sanitization (e.g., `re.sub(r'(://[^:]+:).*?(@[^@/]+(?:/|$))', r'\1***\2', str(e))`) to redact sensitive parts while maintaining diagnostic value.
