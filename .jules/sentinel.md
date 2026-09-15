@@ -1,0 +1,4 @@
+## 2024-05-24 - Masking credentials in proxy URLs and exception logs
+**Vulnerability:** Proxy credentials (passwords containing colons or other special chars) are logged in plaintext when used and can leak in `requests` exception stack traces or debug prints. Also, failing to properly URL encode proxy credentials can lead to injection-like behaviour.
+**Learning:** Python `requests` and default logging do not automatically obscure inline URL credentials. Passing proxy strings to threads and logging raw exceptions leads to credentials spilling into stdout.
+**Prevention:** Passwords in proxy URLs should be URL-encoded. Log statements displaying proxy strings must be manually sanitized to replace passwords with `***`. Exception strings from network libraries should be scrubbed with regex `re.sub(r'(://[^:]+:).*?(@[^@/]+(?:/|$))', r'\1***\2', str(e))` before printing to mask embedded credentials.
