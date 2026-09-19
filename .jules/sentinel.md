@@ -1,0 +1,4 @@
+## 2024-05-18 - Credentials Leaked in Request Exceptions
+**Vulnerability:** Proxy credentials (username and password) were printed in plaintext when the `requests` module raised exceptions, as exceptions contain the full requested URL including HTTP basic auth parts.
+**Learning:** Python's `requests` library automatically percent-encodes proxy credentials in error messages. Regex matching must account for these percent-encoded values (like `%40` instead of `@`) or risk failing to redact the sensitive information. Also, simple `print(e)` will log sensitive credentials without redacting.
+**Prevention:** Sanitize exception strings with URL-aware masking before printing. Ensure credentials in URLs are explicitly URL-encoded before passing to `requests` to prevent injection and handle special characters correctly.
