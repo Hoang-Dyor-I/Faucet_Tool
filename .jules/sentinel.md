@@ -1,0 +1,4 @@
+## 2024-09-26 - Prevent credential leakage in logs and exception messages
+**Vulnerability:** The script printed raw proxy strings containing plaintext credentials to the console during execution and did not sanitize connection exception messages from `requests`, which natively expose full proxy URLs including credentials.
+**Learning:** Proxy credentials in exception messages require regex sanitization because `requests` automatically percent-encodes credentials in its error output, altering characters and bypassing simple string replacements. Also, proxy variables must be masked before standard logging.
+**Prevention:** Always implement regex-based sanitization for error messages containing network endpoints and mask sensitive fields when printing config variables to logs. Use `urllib.parse.quote` for URL components to ensure validity and prevent injection.
