@@ -1,0 +1,4 @@
+## 2024-06-25 - Prevent proxy plaintext credentials exposure in exception logs
+**Vulnerability:** Raw proxy credentials with plaintext passwords (like `user:pass@host:port`) were exposed in output logs because raw exception objects containing proxy strings were printed directly. Furthermore, proxy credentials were not URL encoded, leading to requests failing if passwords contained special characters.
+**Learning:** `requests` exception messages automatically include proxy details from the provided `proxies` dictionary, meaning catching and printing the full exception exposes percent-encoded plaintext passwords.
+**Prevention:** Sanitize error messages using regex (`re.sub(r'(://[^:]+:).*?(@)', r'\1***\2', str(e))`) before logging, and URL-encode proxy username and password before constructing the auth string to ensure robust connection without leakage.
