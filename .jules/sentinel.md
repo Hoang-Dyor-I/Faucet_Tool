@@ -1,0 +1,4 @@
+## 2023-10-05 - Proxy Credentials Leakage in Python Requests Errors
+**Vulnerability:** Proxy credentials (username and password) embedded in proxy connection URLs were being leaked in plaintext to terminal outputs via unhandled 'requests' library exceptions and initial proxy logging.
+**Learning:** The Python 'requests' library may include the full, plaintext proxy URL (including credentials) in its string representations of network errors (like ProxyError or ConnectionError). Simply masking credentials before a request is not sufficient if the underlying network library leaks the raw URL upon failure.
+**Prevention:** Always intercept and sanitize network library exception strings (e.g., using regex substitution to replace password fields) before logging them. Additionally, parse and percent-encode credentials during URL construction to avoid injection vulnerabilities, and explicitly mask credentials during any pre-request logging.
