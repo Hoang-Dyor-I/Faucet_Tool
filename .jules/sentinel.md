@@ -1,0 +1,4 @@
+## 2024-10-10 - Proxy Credential Leakage in Application Logs and Traces
+**Vulnerability:** Proxy credentials (passwords) containing special characters or user secrets were being logged in plaintext during proxy startup (`print`) and were vulnerable to exposure within the exception stack trace emitted by `requests` on connection failures.
+**Learning:** Automated testing bots and naive implementations frequently log runtime state variables entirely, and standard libraries like `requests` embed full URLs (including unmasked credentials) in exceptions. Also, `urllib.parse.quote` is required so that special characters do not break the URL format.
+**Prevention:** Always introduce explicit sanitization/masking functions for all user credentials before printing, and wrap external library calls with exception blocks that scrub output strings using regex targeting the authentication segment of a URI.
