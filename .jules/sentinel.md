@@ -1,0 +1,4 @@
+## 2023-10-25 - Credential Leakage in Application Logs and Error Messages
+**Vulnerability:** Proxy credentials (username and password) were being logged in plaintext during proxy assignment, and exception messages from the `requests` library could expose them. Furthermore, credentials with special characters were not URL-encoded.
+**Learning:** Developers often forget that libraries like `requests` embed full URLs (including inline auth) in their exception traces, leading to inadvertent credential leaks. Custom formatting is required before logging proxy strings.
+**Prevention:** Implement explicit proxy masking functions before logging, ensure proper URL-encoding of credentials using `urllib.parse.quote`, and sanitize all exception strings with regex to scrub embedded credentials before output.
