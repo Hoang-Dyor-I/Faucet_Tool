@@ -1,0 +1,4 @@
+## 2024-05-18 - Hardcoded and Exposed Credentials via Logs in Python
+**Vulnerability:** Proxy credentials (username and password) were exposed in cleartext via Python's `Exception` output when a `requests` error occurred, as `requests` includes the full proxy URL (which contains credentials) in its exception message. Additionally, proxy credentials with special characters were improperly interpolated without URL-encoding.
+**Learning:** Default string representation of exceptions from libraries like `requests` may contain full URLs with inline basic auth credentials. Printing `Exception` objects directly to console or logs is dangerous when using authenticated endpoints or proxies.
+**Prevention:** 1) Always URL-encode credentials used in proxy authentication. 2) Implement regex-based masking or sanitized error handling to strip sensitive authentication material before logging exception strings.
