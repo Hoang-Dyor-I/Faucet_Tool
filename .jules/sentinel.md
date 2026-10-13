@@ -1,0 +1,4 @@
+## 2024-05-20 - Proxy Credentials Leakage in Error Logs
+**Vulnerability:** Proxy passwords (including those with special characters) were leaked in plaintext in console logs and unhandled `requests` exception messages. Additionally, credentials were not URL-encoded, leading to potential connection failures with special characters.
+**Learning:** External libraries like `requests` often include full proxy URLs (with credentials) in their internal exception strings. Simply catching and printing the exception (`except Exception as e: print(e)`) exposes these secrets.
+**Prevention:** Always percent-encode proxy credentials before constructing URLs. Implement a robust regex-based redaction (e.g., `re.sub`) or dedicated logging sanitization layer to mask credentials in exception strings and debug logs before they are written or printed.
