@@ -1,0 +1,4 @@
+## 2024-05-24 - Credentials Leak in Proxy Handling & Error Logs
+**Vulnerability:** Proxy credentials (username and password) were exposed in raw string prints and unhandled request exception logs. Additionally, special characters like `@` in the password were not URL-encoded, breaking the HTTP proxy authentication.
+**Learning:** Raw exception strings from HTTP libraries like `requests` often contain the full request URLs including plaintext credentials. Relying on default string representation for exceptions exposes credentials to standard output. Proxy parsing requires `maxsplit=3` to handle passwords with colons.
+**Prevention:** Always parse or split sensitive strings to isolate and mask credentials before logging. Utilize regex (e.g., `re.sub(r'(://[^:]+:).*?(@[^@/]+(?:/|$))', r'\1***\2', str(e))`) to sanitize raw exception outputs. URL-encode HTTP credentials using `urllib.parse.quote(..., safe='')` prior to forming URLs.
