@@ -1,0 +1,4 @@
+## 2024-10-18 - Masked Proxy Credentials in Exception Logs and URL Encoding Fix
+**Vulnerability:** Proxy passwords containing special characters (like '@' or ':') could cause URL parsing errors, and raw `requests` exception messages were leaking plaintext or URL-encoded passwords in logs when proxy connections failed.
+**Learning:** `requests` automatically percent-encodes credentials in exception outputs. Standard exception handling blindly prints these, leading to potential credential disclosure. Additionally, proxy string splitting without `maxsplit` truncates passwords containing colons.
+**Prevention:** Always URL-encode proxy credentials before passing them to `requests`. Use `maxsplit=3` when parsing `host:port:user:pass`. Apply regex sanitization (e.g., `re.sub(r'(://[^:]+:).*?(@[^@/]+(?:/|$))', r'\1***\2', str(e))`) to mask passwords in error messages before logging, while preserving debugging context.
