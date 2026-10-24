@@ -1,0 +1,4 @@
+## 2024-05-24 - Unmasked Proxy Credentials in Logs and Exception Messages
+**Vulnerability:** Proxy credentials (passwords) are logged in plaintext when switching proxies and within `requests` library exception outputs.
+**Learning:** Proxy strings passed around application logic natively display credentials if printed. The `requests` library automatically includes url credentials in certain exception strings (like ConnectionError), requiring explicit string replacement. Special characters in passwords can also cause formatting issues or crash un-quoted URL usage.
+**Prevention:** Implement a masking function (e.g., `mask_proxy`) before logging proxy strings. Sanitize raw exception strings with regex that isolates the password section while preserving the URL structure before printing. Quote credentials before creating proxy URLs.
