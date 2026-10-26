@@ -1,0 +1,4 @@
+## 2024-10-26 - Information Exposure via Unhandled Proxy Credentials
+**Vulnerability:** The `request_faucet` function exposed proxy credentials (including the username and password) in plaintext when exceptions occurred (e.g., `requests.exceptions.ProxyError` printing the full proxy URL). Additionally, the main loop logged proxy strings containing unmasked passwords directly to the console.
+**Learning:** `requests` automatically percent-encodes credentials in exception messages, which must be accounted for in regex sanitization. Proxy strings passed to users should also be explicitly redacted before logging.
+**Prevention:** Implement proactive regex-based sanitization for all external library exception strings that might embed URLs, and write dedicated helper functions to mask credentials in any user-facing configuration outputs.
