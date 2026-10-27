@@ -1,0 +1,4 @@
+## 2024-05-18 - Credentials Leak in Proxy Strings
+**Vulnerability:** Proxy credentials (username and password) were embedded in proxy strings and error logs without masking.
+**Learning:** Proxy connection errors from libraries like `requests` can leak plain text credentials (or URL encoded ones) if they are embedded in the proxy URL. Masking strings containing URLs with credentials in exceptions must be careful to handle percent encoded characters. In Python 3, `urllib.parse.quote` should be used to URL encode proxy credentials to avoid parsing issues and avoid injection-like vulnerabilities.
+**Prevention:** Always mask credentials (e.g. passwords) before logging them, and sanitize exception messages that contain URLs with credentials using regex. Ensure all user input like passwords are URL encoded.
