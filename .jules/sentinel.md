@@ -1,0 +1,4 @@
+## 2024-05-24 - Credentials logging and encoding fix
+**Vulnerability:** Proxy credentials (passwords with colons or special chars) were improperly parsed, unencoded in URLs, and leaked into raw exceptions when `requests` proxy connections failed. `proxy` strings were also printed in plaintext to logs.
+**Learning:** `requests` automatically percent-encodes credentials in exception messages, which breaks simple regex matchers. Also, passwords can contain `:` and `@`, which breaks blind `.split(":")` and manual URL construction if not properly handled with `maxsplit=3` and `urllib.parse.quote`.
+**Prevention:** Always percent-encode credentials in proxy URIs using `urllib.parse.quote(val, safe='')`. Parse proxy strings with a maximum split count. Mask sensitive strings explicitly before printing, and use regex to scrub raw exception strings.
