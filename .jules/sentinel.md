@@ -1,0 +1,4 @@
+## 2024-10-31 - Proxy Credentials Exposure
+**Vulnerability:** Proxy credentials (passwords) containing special characters were exposed in clear text when printed to the console directly or within `requests` exception traceback messages.
+**Learning:** Hardcoded proxy strings expose secrets. Using `requests` error objects without sanitizing error strings exposes the HTTP connection payload, including the URL-encoded proxy credentials. Splitting proxy strings using only `:` fails for passwords that include colons.
+**Prevention:** Apply regex sanitization to catch both raw output and library-generated exception tracebacks containing proxy configurations (e.g., URL encoded `%40` for `@`). Ensure string splittings use a length boundary (like `maxsplit=3`) for credential separation. Use URL encoding on user/pass tokens securely.
