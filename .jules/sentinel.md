@@ -1,0 +1,4 @@
+## 2024-05-17 - Prevent Credential Leak in Proxy Exceptions
+**Vulnerability:** The script logged raw exception objects from the `requests` library when proxy connections failed. If the proxy URL contains a username and password, the `requests` library includes this full URL in the `ProxyError` exception message, inadvertently leaking credentials to the console logs.
+**Learning:** Raw exception objects from libraries handling network requests often embed the full connection URL, including any inline credentials (like HTTP basic auth in proxies), within the exception message string.
+**Prevention:** Before logging or printing exception messages related to network requests, sanitize the string representation of the exception using regex (e.g., `re.sub(r'(://[^:]+:).*?(@[^@/]+(?:/|$))', r'\1***\2', str(e))`) to mask passwords.
