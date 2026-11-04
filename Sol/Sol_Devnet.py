@@ -2,6 +2,8 @@ import requests
 import random
 import time
 import threading
+import urllib.parse
+import re
 
 FAUCET_URL = "https://api.devnet.solana.com"
 MIN_THREADS = 20
@@ -17,8 +19,13 @@ wallets = read_lines("wallets.txt")
 proxies = read_lines("proxies.txt")
 
 def get_proxy_dict(proxy_str):
-    host, port, user, password = proxy_str.split(":")
-    proxy_auth = f"{user}:{password}@{host}:{port}"
+    parts = proxy_str.split(":", 3)
+    if len(parts) != 4:
+        return None
+    host, port, user, password = parts
+    safe_user = urllib.parse.quote(user, safe='')
+    safe_password = urllib.parse.quote(password, safe='')
+    proxy_auth = f"{safe_user}:{safe_password}@{host}:{port}"
     return {
         "http": f"http://{proxy_auth}",
         "https": f"http://{proxy_auth}"
@@ -26,6 +33,8 @@ def get_proxy_dict(proxy_str):
 
 def request_faucet(wallet, proxy_str):
     proxy = get_proxy_dict(proxy_str)
+    if proxy is None:
+        return
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -41,7 +50,8 @@ def request_faucet(wallet, proxy_str):
         else:
             print(f"❌ Airdrop thất bại cho {wallet} - {response.text}")
     except Exception as e:
-        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet} - {e}")
+        safe_e = re.sub(r'(://[^:]+:).*?(@[^@/]+(?:/|$))', r'\1***\2', str(e))
+        print(f"⚠️ Lỗi proxy hoặc kết nối cho {wallet} - {safe_e}")
     time.sleep(random.uniform(*DELAY_BETWEEN_REQUESTS))
 
 def run_batch(wallets_batch, proxy):
