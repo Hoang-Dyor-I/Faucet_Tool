@@ -1,0 +1,4 @@
+## 2024-05-24 - [CRITICAL] Sensitive Data Exposure in Proxy Logging
+**Vulnerability:** Proxy credentials (passwords and usernames) were being logged in plaintext to the console during iteration and could also be leaked through unhandled exceptions in the requests library.
+**Learning:** Raw credentials should never be printed directly. Python's requests library automatically percent-encodes credentials in exception messages, which requires specific regex handling to properly mask them without losing context. Moving file reads into main() also prevents global side effects during script imports.
+**Prevention:** Always parse or split sensitive configuration strings to isolate and mask credentials before logging. Use regex to sanitize exception strings to avoid revealing sensitive URLs while preserving debug information.
