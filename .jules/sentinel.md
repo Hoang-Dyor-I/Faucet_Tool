@@ -1,0 +1,4 @@
+## 2024-11-09 - Requests Exception Proxy Credential Leakage
+**Vulnerability:** The `requests` library automatically includes proxy URLs in its exception messages, which inadvertently leaked plaintext proxy passwords to the console logs via `str(e)`. Additionally, raw proxy strings containing passwords were being logged in the main execution loop.
+**Learning:** Exception handling for network operations can easily become a vector for credential leakage if the underlying libraries embed request details in their error strings. URL-encoded credentials within these errors must be handled specifically by sanitization regex.
+**Prevention:** Always parse or split sensitive strings to mask credentials before logging. Implement proactive regex sanitization for any exception strings originating from network libraries to mask patterns resembling credentials.
