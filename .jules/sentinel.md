@@ -1,0 +1,4 @@
+## 2024-11-10 - Secure Proxy Credential Handling
+**Vulnerability:** Proxy passwords with special characters (@, :) were not URL-encoded before being used in proxy URLs, which broke request connections. Additionally, proxy connection errors dumped raw traceback strings containing plaintext proxy credentials. Finally, global I/O reads on import caused side effects when testing or importing the script.
+**Learning:** Proxy credentials passed via HTTP URLs must be percent-encoded to prevent malformed URLs, and exceptions from `requests` involving proxies implicitly include plaintext URLs in their error messages. Scripts intended to be run and imported must wrap I/O operations in a `main()` block.
+**Prevention:** Use `urllib.parse.quote` for proxy credentials, sanitize exception messages via regex (e.g. `r'(://[^:]+:).*?(@[^@/]+(?:/|$))'`) before logging, and use `if __name__ == '__main__':` pattern properly.
