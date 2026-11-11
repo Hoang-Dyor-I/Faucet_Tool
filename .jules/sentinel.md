@@ -1,0 +1,4 @@
+## 2024-11-11 - Leaked Proxy Credentials in Exceptions
+**Vulnerability:** Proxy credentials (username/password) with special characters were being leaked in plaintext via requests exception messages because the exception objects were printed directly. Additionally, lack of URL encoding in proxy strings could cause injection-like issues with special characters.
+**Learning:** requests error messages include the full proxy URL when connection fails, exposing credentials if not sanitized. Special characters in passwords also break proxy parsing if split(":") is used without a limit.
+**Prevention:** Use split(":", 3) for parsing proxy strings, encode credentials using urllib.parse.quote(..., safe=''), sanitize exception strings using regex to mask passwords before logging, and mask passwords when printing standard proxy status.
